@@ -1,0 +1,15 @@
+[Unit]
+Description=KRRL-01 operator kiosk
+After=krrl.service
+Requires=krrl.service
+
+[Service]
+Type=simple
+User=krrl
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+ExecStart=/usr/bin/chromium --kiosk --app=http://127.0.0.1:8080 --check-for-update-interval=31536000
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=graphical.target

@@ -1,0 +1,20 @@
+[Unit]
+Description=KRRL-01 lathe host
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=krrl
+Group=dialout
+WorkingDirectory=/opt/krrl-01
+Environment=PYTHONPATH=/opt/krrl-01/host
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 -m krrl --config /opt/krrl-01/config/machine.yaml --ui /opt/krrl-01/ui --data /opt/krrl-01/data
+Restart=on-failure
+RestartSec=2
+Nice=-5
+CPUAffinity=0 1 2
+
+[Install]
+WantedBy=multi-user.target

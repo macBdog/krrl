@@ -1,0 +1,40 @@
+# KRRL-01 machine calibration. Host reads this; firmware pins are in config.h.
+name: KRRL-01
+serial:
+  port: /dev/ttyACM0
+  baud: 115200
+audio:
+  device: default
+  rate: 48000
+  quantum: 1024
+camera:
+  device: /dev/video0
+  width: 1280
+  height: 720
+platter:
+  steps_per_rev: 3200
+  tach_ppr: 1
+  rpm_band: 0.3
+x:
+  steps_per_mm: 400.0
+  min_mm: 52.0
+  max_mm: 160.0
+  home_dir: outer
+z:
+  steps_per_mm: 2000.0
+  retract_mm: 2.0
+  min_mm: 0.0
+  max_mm: 4.0
+heater:
+  kp: 12.0
+  ki: 0.4
+  kd: 8.0
+  max_c: 220.0
+  band_c: 5.0
+cut:
+  require_vacuum: true
+  lock_groove_revs: 3
+host:
+  bind: 0.0.0.0
+  port: 8080
+  tel_hz: 15

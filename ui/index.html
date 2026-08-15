@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KRRL-01</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="mark">KRRL-01</span>
+      <span class="sub">lathe console</span>
+    </div>
+    <nav>
+      <a href="#live">Live</a>
+      <a href="#experiment">Experiment</a>
+      <a href="#cut">Cut</a>
+      <a href="#setup">Setup</a>
+    </nav>
+    <div class="pill" id="conn">offline</div>
+  </header>
+
+  <section id="live" class="page">
+    <div class="grid-2">
+      <div class="panel">
+        <h2>Telemetry</h2>
+        <div class="readouts">
+          <div><label>RPM</label><b id="r-rpm">—</b></div>
+          <div><label>X mm</label><b id="r-x">—</b></div>
+          <div><label>Z mm</label><b id="r-z">—</b></div>
+          <div><label>Stylus °C</label><b id="r-t">—</b></div>
+          <div><label>State</label><b id="r-state">—</b></div>
+          <div><label>Vacuum</label><b id="r-vac">—</b></div>
+        </div>
+        <p class="estop hidden" id="estop">E-STOP</p>
+        <div class="row">
+          <button class="abort" id="btn-abort">ABORT</button>
+          <button id="btn-home">Home all</button>
+        </div>
+        <div class="row wrap">
+          <button data-jog="X,-1">X −1</button>
+          <button data-jog="X,1">X +1</button>
+          <button data-jog="Z,-0.05">Z −0.05</button>
+          <button data-jog="Z,0.05">Z +0.05</button>
+        </div>
+        <div class="row">
+          <label>Heat °C <input type="number" id="heat" value="0" min="0" max="220"></label>
+          <button id="btn-heat">Set heat</button>
+          <button id="btn-vac">Vacuum</button>
+        </div>
+        <div class="row">
+          <label>RPM
+            <select id="rpm">
+              <option value="0">0</option>
+              <option value="33.333">33⅓</option>
+              <option value="45">45</option>
+              <option value="78">78</option>
+            </select>
+          </label>
+          <button id="btn-rpm">Set RPM</button>
+        </div>
+      </div>
+      <div class="panel cam">
+        <h2>Macro</h2>
+        <img id="cam-live" alt="camera" src="/api/camera">
+      </div>
+    </div>
+  </section>
+
+  <section id="experiment" class="page hidden">
+    <div class="grid-2">
+      <div class="panel">
+        <h2>Recipe</h2>
+        <form id="exp-form" class="form">
+          <label>Name <input name="name" required></label>
+          <label>Blank in
+            <select name="diameter_in"><option>7</option><option>10</option><option selected>12</option></select>
+          </label>
+          <label>Material <input name="material" value="lacquer"></label>
+          <label>RPM
+            <select name="platter_rpm">
+              <option value="33.333">33⅓</option>
+              <option value="45">45</option>
+              <option value="78">78</option>
+            </select>
+          </label>
+          <label>LPI <input name="lpi" type="number" min="80" max="400" step="1"></label>
+          <label>Start radius mm <input name="start_radius_mm" type="number" step="0.1"></label>
+          <label>End radius mm <input name="end_radius_mm" type="number" step="0.1"></label>
+          <label>Lead-in s <input name="lead_in_s" type="number" step="0.1"></label>
+          <label>Lead-out s <input name="lead_out_s" type="number" step="0.1"></label>
+          <label class="chk"><input name="lock_groove" type="checkbox"> Lock groove</label>
+          <label>Depth µm <input name="depth_um" type="number" step="1"></label>
+          <label>Stylus °C <input name="stylus_c" type="number" step="1"></label>
+          <label>Audio path <input name="audio_path"></label>
+          <label>Gain dB <input name="gain_db" type="number" step="0.1"></label>
+          <label class="chk"><input name="vacuum" type="checkbox"> Vacuum</label>
+          <label>Notes <textarea name="notes" rows="3"></textarea></label>
+        </form>
+        <p class="cap" id="capacity">—</p>
+        <div class="row">
+          <button id="btn-save">Save</button>
+          <button id="btn-new">New</button>
+          <button id="btn-dup">Duplicate</button>
+          <button class="danger" id="btn-del">Delete</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Library</h2>
+        <ul id="exp-list" class="list"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="cut" class="page hidden">
+    <div class="grid-2">
+      <div class="panel">
+        <h2>Cut</h2>
+        <p>Loaded: <b id="cut-name">none</b></p>
+        <ul class="locks" id="locks"></ul>
+        <p>Phase: <b id="cut-phase">idle</b></p>
+        <div class="row">
+          <button id="btn-cut" class="go">Start cut</button>
+          <button class="abort" id="btn-cut-abort">ABORT</button>
+        </div>
+        <pre id="cut-log" class="log"></pre>
+      </div>
+      <div class="panel cam">
+        <h2>Groove</h2>
+        <img id="cam-cut" alt="camera" src="/api/camera">
+      </div>
+    </div>
+  </section>
+
+  <section id="setup" class="page hidden">
+    <div class="panel">
+      <h2>Machine</h2>
+      <p id="setup-mode"></p>
+      <form id="setup-form" class="form">
+        <label>Serial port <input name="serial_port"></label>
+        <label>Baud <input name="serial_baud" type="number"></label>
+        <label>Audio device <input name="audio_device"></label>
+        <label>Camera device <input name="camera_device"></label>
+        <label>X steps/mm <input name="x_steps_per_mm" type="number" step="0.1"></label>
+        <label>Z steps/mm <input name="z_steps_per_mm" type="number" step="0.1"></label>
+        <label>Platter steps/rev <input name="platter_steps_per_rev" type="number"></label>
+        <label>Tach PPR <input name="tach_ppr" type="number"></label>
+        <label>Heater Kp <input name="heater_kp" type="number" step="0.1"></label>
+        <label>Heater Ki <input name="heater_ki" type="number" step="0.01"></label>
+        <label>Heater Kd <input name="heater_kd" type="number" step="0.1"></label>
+      </form>
+      <button id="btn-setup-save">Save machine.yaml</button>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
