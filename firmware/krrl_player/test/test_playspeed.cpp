@@ -49,6 +49,15 @@ int main() {
   eq_i("sps@0", krrl_rpm_to_sps(0.0f), 0);
   eq_i("sps@neg", krrl_rpm_to_sps(-5.0f), 0);
 
+  /* Pitch fader ADC (10-bit, centre 511, deadband 10) -> trim percent. */
+  eq_f("pot centre", krrl_pot_to_pitch_pct(511, 1023, 10), 0.0f);
+  eq_f("pot in deadband", krrl_pot_to_pitch_pct(517, 1023, 10), 0.0f);
+  eq_f("pot full up", krrl_pot_to_pitch_pct(1023, 1023, 10), 8.0f);
+  eq_f("pot full down", krrl_pot_to_pitch_pct(0, 1023, 10), -8.0f);
+  eq_f("pot just past deadband", krrl_pot_to_pitch_pct(521, 1023, 10), 0.0f);
+  eq_f("pot ~3/4 up", krrl_pot_to_pitch_pct(767, 1023, 10), 3.9203f);
+  eq_f("pot clamp over-range", krrl_pot_to_pitch_pct(2000, 1023, 10), 8.0f);
+
   if (fails) { printf("\n%d check(s) FAILED\n", fails); return 1; }
   printf("\nplayspeed: ok\n");
   return 0;

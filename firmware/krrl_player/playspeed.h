@@ -43,6 +43,22 @@ static inline int32_t krrl_rpm_to_sps(float rpm) {
   return (int32_t)(rpm / 60.0f * KRRL_PLATTER_STEPS_PER_REV + 0.5f);
 }
 
+/* Map a pitch-fader ADC reading to a trim percent. The fader centre detent is
+ * 0%; either end is +/-KRRL_PITCH_MAX_PCT. A small deadband around centre keeps
+ * the platter at exactly nominal speed when the fader rests in the middle, and
+ * the travel each side of the deadband is rescaled so the ends still hit the
+ * full +/-8%. Higher reading = pitch up. */
+static inline float krrl_pot_to_pitch_pct(int raw, int raw_max, int deadband) {
+  int center = raw_max / 2;
+  int d = raw - center;
+  if (d > -deadband && d < deadband) return 0.0f;
+  int span;
+  if (d > 0) { d -= deadband; span = (raw_max - center) - deadband; }
+  else       { d += deadband; span = center - deadband; }
+  if (span < 1) span = 1;
+  return krrl_clamp_pitch_pct((float)d / (float)span * KRRL_PITCH_MAX_PCT);
+}
+
 /* Step the current rate toward a target by at most max_step, so the belt
  * accelerates and decelerates smoothly instead of stalling. */
 static inline int32_t krrl_slew_toward(int32_t cur, int32_t target, int32_t max_step) {

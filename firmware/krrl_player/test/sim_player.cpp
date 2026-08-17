@@ -50,8 +50,8 @@ int main() {
   run("settle 78", krrl_rpm_to_sps(krrl_pitched_rpm(base, pitch)), 500);
   if (rate != 4160) { printf("FAIL not at 78 (4160)\n"); fails++; }
 
-  printf("\nPITCH +8%%\n");
-  pitch = 8.0f;
+  printf("\nPITCH fader to full up (+8%%)\n");
+  pitch = krrl_pot_to_pitch_pct(1023, 1023, 10); /* fader hard over = +8% */
   run("ramp to 78+8", krrl_rpm_to_sps(krrl_pitched_rpm(base, pitch)), 200);
   if (rate != 4493) { printf("FAIL not at 78+8 (4493)\n"); fails++; }
 

@@ -21,13 +21,16 @@ The default build is STEP/DIR only and needs no libraries.
 | 78 select | D8 | momentary to GND |
 | START | D9 | momentary to GND |
 | STOP | D10 | momentary to GND |
-| PITCH− | D11 | momentary to GND, hold to sweep |
-| PITCH+ | D12 | momentary to GND, hold to sweep |
+| Pitch fader | A0 | 10k linear pot wiper; ends to 5V and GND |
 | Run LED | D13 | onboard; solid = running, blink = pitch trimmed |
 
-All buttons are `INPUT_PULLUP`, wired button-to-ground. Pins are in `config.h`.
+Buttons are `INPUT_PULLUP`, wired button-to-ground. The pitch fader is a 10k
+linear potentiometer: outer legs to 5V and GND, wiper to A0. Pins are in
+`config.h`.
 
-Press **PITCH+ and PITCH− together** to reset the trim to 0.
+Pitch is continuous: the fader **centre detent reads 0%** (a small deadband
+holds nominal speed), and each end reaches **±8%**. Firmware smooths the reading
+so the platter speed doesn't jitter.
 
 ## TMC2209 current / microsteps (optional)
 

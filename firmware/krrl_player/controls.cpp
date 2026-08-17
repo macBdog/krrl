@@ -1,17 +1,18 @@
 #include "controls.h"
 
-enum { B_33, B_45, B_78, B_START, B_STOP, B_PUP, B_PDN, N_BTN };
+enum { B_33, B_45, B_78, B_START, B_STOP, N_BTN };
 
 static const uint8_t PIN[N_BTN] = {
   PIN_BTN_33, PIN_BTN_45, PIN_BTN_78,
   PIN_BTN_START, PIN_BTN_STOP,
-  PIN_BTN_PITCH_UP, PIN_BTN_PITCH_DN,
 };
 
 static uint8_t stable[N_BTN];      /* 1 = pressed (debounced) */
 static uint8_t raw_last[N_BTN];
 static uint32_t changed_ms[N_BTN];
 static uint8_t edge[N_BTN];        /* set on falling edge, cleared on read */
+
+static float pot_ema;              /* smoothed fader ADC reading */
 
 void controls_begin() {
   for (uint8_t i = 0; i < N_BTN; i++) {
@@ -21,6 +22,8 @@ void controls_begin() {
     changed_ms[i] = millis();
     edge[i] = 0;
   }
+  pinMode(PIN_PITCH_POT, INPUT);
+  pot_ema = (float)analogRead(PIN_PITCH_POT);
 }
 
 void controls_poll() {
@@ -47,5 +50,9 @@ bool press_45() { return take_edge(B_45); }
 bool press_78() { return take_edge(B_78); }
 bool press_start() { return take_edge(B_START); }
 bool press_stop() { return take_edge(B_STOP); }
-bool hold_pitch_up() { return stable[B_PUP]; }
-bool hold_pitch_dn() { return stable[B_PDN]; }
+
+float controls_pitch_pct() {
+  int raw = analogRead(PIN_PITCH_POT);
+  pot_ema += ((float)raw - pot_ema) * POT_EMA_ALPHA;
+  return krrl_pot_to_pitch_pct((int)(pot_ema + 0.5f), POT_MAX_COUNTS, POT_DEADBAND);
+}

@@ -7,7 +7,7 @@ hardware, no host, no UI, no serial protocol.
 ## What it does
 
 - Playback at **33⅓ / 45 / 78** rpm.
-- **Pitch** trim of **±8%**, up/down, hold to sweep.
+- Continuous **pitch fader** of **±8%** (centre detent = 0%).
 - **Start / Stop** with a smooth rate-slewed belt spin-up.
 
 No cutter, heater, vacuum, camera, audio pipeline, homing or limits — none of the
@@ -24,14 +24,14 @@ lathe's cut path is present.
 
 ## Controls
 
-Seven momentary buttons and the onboard LED. Wiring and pins are in
-[`firmware/krrl_player/README.md`](../firmware/krrl_player/README.md).
+Five momentary buttons, one pitch fader and the onboard LED. Wiring and pins are
+in [`firmware/krrl_player/README.md`](../firmware/krrl_player/README.md).
 
-| Button | Action |
-|--------|--------|
+| Control | Action |
+|---------|--------|
 | 33 / 45 / 78 | Select nominal speed (persists across start/stop) |
 | START / STOP | Spin platter up / down |
-| PITCH+ / PITCH− | Trim running speed ±8% (hold to sweep; both = reset) |
+| Pitch fader | Continuous ±8% trim of running speed; centre detent = 0% |
 
 LED: solid while running at nominal speed, blinking while a pitch trim is applied.
 

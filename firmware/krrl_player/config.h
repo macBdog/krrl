@@ -14,14 +14,15 @@
 #define PIN_PLATTER_DIR  4
 #define PIN_PLATTER_EN   5   /* active LOW enable */
 
-/* ---- Front-panel controls (momentary to GND, INPUT_PULLUP) ---- */
+/* ---- Front-panel buttons (momentary to GND, INPUT_PULLUP) ---- */
 #define PIN_BTN_33       6
 #define PIN_BTN_45       7
 #define PIN_BTN_78       8
 #define PIN_BTN_START    9
 #define PIN_BTN_STOP     10
-#define PIN_BTN_PITCH_UP 11
-#define PIN_BTN_PITCH_DN 12
+
+/* ---- Pitch fader (10k linear pot: ends to 5V/GND, wiper here) ---- */
+#define PIN_PITCH_POT    A0
 
 /* ---- Status LED (onboard) ---- */
 #define PIN_LED_RUN      13  /* on = platter running, blink = pitch trimmed */
@@ -31,8 +32,9 @@
 
 /* ---- Control tunables ---- */
 #define DEBOUNCE_MS      25
-#define PITCH_REPEAT_MS  120   /* auto-repeat while a pitch button is held */
-#define PITCH_STEP_PCT   0.2f  /* trim change per press/repeat */
+#define POT_MAX_COUNTS   1023  /* 10-bit ADC full scale */
+#define POT_DEADBAND     10    /* +/- counts around centre that read as 0% */
+#define POT_EMA_ALPHA    0.20f /* fader smoothing (0..1); higher = snappier */
 
 /* Platter acceleration as a step-rate slew, so the belt starts and changes
  * speed smoothly instead of stalling. sps added/removed per control poll. */
