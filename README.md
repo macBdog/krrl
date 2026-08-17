@@ -32,12 +32,20 @@ PYTHONPATH=host python3 -m krrl.check
 
 | Path | Role |
 |------|------|
-| `firmware/krrl_mega/` | Mega 2560 sketch |
+| `firmware/krrl_mega/` | Mega 2560 sketch (lathe) |
+| `firmware/krrl_player/` | Nano sketch (player turntable variant) |
 | `host/krrl/` | Python host |
 | `ui/` | Operator console |
 | `config/machine.yaml` | Calibration and devices |
 | `docs/PROTOCOL.md` | Serial line protocol |
+| `docs/PLAYER.md` | Player turntable variant |
 | `deploy/` | systemd, PipeWire, OS tune |
+
+## Player variant
+
+A lower-cost, playback-only turntable on an **Arduino Nano only** (no Pi, no UI):
+33/45/78 with ±8% pitch and start/stop, reusing the lathe belt drive, TMC2209
+driver and motion core. See [docs/PLAYER.md](docs/PLAYER.md).
 
 ## Cut v1
 

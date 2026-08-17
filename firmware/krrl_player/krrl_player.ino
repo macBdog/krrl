@@ -1,0 +1,75 @@
+#include "config.h"
+#include "playspeed.h"
+#include "platter.h"
+#include "controls.h"
+#include "tmc.h"
+
+/* KRRL-01 Player: hardware-only belt-drive turntable on an Arduino Nano.
+ *
+ * Panel: [33] [45] [78]  [START] [STOP]  [PITCH-] [PITCH+]
+ *  - 33/45/78 select the nominal speed (persists across start/stop).
+ *  - START/STOP spin the platter up/down (rate-slewed for the belt).
+ *  - PITCH+/- trim the running speed by +/-8%; hold to sweep.
+ *    Press both together to reset the trim to 0.
+ *  - Onboard LED: solid = running at nominal, blinking = running with trim. */
+
+static float base_rpm = DEFAULT_RPM;
+static float pitch_pct = 0.0f;
+static bool running = false;
+static uint32_t last_pitch_ms = 0;
+
+static void apply_speed() {
+  float rpm = running ? krrl_pitched_rpm(base_rpm, pitch_pct) : 0.0f;
+  platter_set_target_sps(krrl_rpm_to_sps(rpm));
+}
+
+static void update_led() {
+  bool trimmed = pitch_pct > 0.001f || pitch_pct < -0.001f;
+  if (!running) {
+    digitalWrite(PIN_LED_RUN, LOW);
+  } else if (!trimmed) {
+    digitalWrite(PIN_LED_RUN, HIGH);
+  } else {
+    digitalWrite(PIN_LED_RUN, (millis() / 250) & 1 ? HIGH : LOW);
+  }
+}
+
+static void poll_pitch() {
+  bool up = hold_pitch_up();
+  bool dn = hold_pitch_dn();
+  uint32_t now = millis();
+
+  if (up && dn) {                 /* both held: reset trim */
+    pitch_pct = 0.0f;
+    last_pitch_ms = now;
+    return;
+  }
+  if (!up && !dn) return;
+  if (now - last_pitch_ms < PITCH_REPEAT_MS) return;
+  last_pitch_ms = now;
+  pitch_pct = krrl_clamp_pitch_pct(pitch_pct + (up ? PITCH_STEP_PCT : -PITCH_STEP_PCT));
+}
+
+void setup() {
+  tmc_begin();          /* optional TMC2209 UART config (D0/D1) */
+  platter_begin();
+  controls_begin();
+  pinMode(PIN_LED_RUN, OUTPUT);
+  digitalWrite(PIN_LED_RUN, LOW);
+  apply_speed();
+}
+
+void loop() {
+  controls_poll();
+
+  if (press_33()) base_rpm = KRRL_RPM_33;
+  if (press_45()) base_rpm = KRRL_RPM_45;
+  if (press_78()) base_rpm = KRRL_RPM_78;
+  if (press_start()) running = true;
+  if (press_stop()) running = false;
+  poll_pitch();
+
+  apply_speed();
+  platter_poll();
+  update_led();
+}
