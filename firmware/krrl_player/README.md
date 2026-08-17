@@ -22,7 +22,8 @@ The default build is STEP/DIR only and needs no libraries.
 | START | D9 | momentary to GND |
 | STOP | D10 | momentary to GND |
 | Pitch fader | A0 | 10k linear pot wiper; ends to 5V and GND |
-| Run LED | D13 | onboard; solid = running, blink = pitch trimmed |
+| Optical tach | D2 | 1 pulse/rev sensor output (INT0); see docs/TACHOMETER.md |
+| Run LED | D13 | onboard; off = stopped, blink = seeking, solid = speed-locked |
 
 Buttons are `INPUT_PULLUP`, wired button-to-ground. The pitch fader is a 10k
 linear potentiometer: outer legs to 5V and GND, wiper to A0. Pins are in
@@ -31,6 +32,14 @@ linear potentiometer: outer legs to 5V and GND, wiper to A0. Pins are in
 Pitch is continuous: the fader **centre detent reads 0%** (a small deadband
 holds nominal speed), and each end reaches **±8%**. Firmware smooths the reading
 so the platter speed doesn't jitter.
+
+## Closed-loop speed (optical tach)
+
+The platter speed is held by a 1-pulse-per-rev optical tachometer on `D2`
+(feedforward step rate plus the lathe's proportional trim). If no sensor is
+fitted the firmware runs open-loop and still reaches speed. How it works, sensor
+choice, and how to mark and machine the platter are in
+[`docs/TACHOMETER.md`](../../docs/TACHOMETER.md).
 
 ## TMC2209 current / microsteps (optional)
 

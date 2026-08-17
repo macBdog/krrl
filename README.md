@@ -39,6 +39,7 @@ PYTHONPATH=host python3 -m krrl.check
 | `config/machine.yaml` | Calibration and devices |
 | `docs/PROTOCOL.md` | Serial line protocol |
 | `docs/PLAYER.md` | Player turntable variant |
+| `docs/TACHOMETER.md` | Closed-loop platter tach + marking/machining |
 | `deploy/` | systemd, PipeWire, OS tune |
 
 ## Player variant

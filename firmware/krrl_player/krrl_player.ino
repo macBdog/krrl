@@ -10,7 +10,8 @@
  *  - 33/45/78 select the nominal speed (persists across start/stop).
  *  - START/STOP spin the platter up/down (rate-slewed for the belt).
  *  - PITCH is a continuous fader: centre detent = 0%, ends = +/-8%.
- *  - Onboard LED: solid = running at nominal, blinking = running with trim. */
+ *  - Speed is held by the optical tachometer (see docs/TACHOMETER.md).
+ *  - Onboard LED: off = stopped, blinking = seeking, solid = speed-locked. */
 
 static float base_rpm = DEFAULT_RPM;
 static float pitch_pct = 0.0f;
@@ -18,14 +19,13 @@ static bool running = false;
 
 static void apply_speed() {
   float rpm = running ? krrl_pitched_rpm(base_rpm, pitch_pct) : 0.0f;
-  platter_set_target_sps(krrl_rpm_to_sps(rpm));
+  platter_set_target_rpm(rpm);
 }
 
 static void update_led() {
-  bool trimmed = pitch_pct > 0.001f || pitch_pct < -0.001f;
   if (!running) {
     digitalWrite(PIN_LED_RUN, LOW);
-  } else if (!trimmed) {
+  } else if (platter_locked()) {
     digitalWrite(PIN_LED_RUN, HIGH);
   } else {
     digitalWrite(PIN_LED_RUN, (millis() / 250) & 1 ? HIGH : LOW);

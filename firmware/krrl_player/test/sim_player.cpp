@@ -1,13 +1,17 @@
 /* Native simulation of the player control/motion timeline.
- * Composes the shared speed math (krrl_rpm_to_sps / krrl_pitched_rpm) with the
- * shared belt slew (krrl_slew_toward) exactly as krrl_player.ino + platter.cpp
- * do, so the spin-up/down and pitch behaviour can be checked without hardware.
+ * Composes the shared speed math (krrl_rpm_to_sps / krrl_pitched_rpm), the
+ * shared belt slew (krrl_slew_toward) and the shared optical-tach loop
+ * (krrl_tach_rpm / krrl_tach_trim_sps) exactly as krrl_player.ino +
+ * platter.cpp do, so spin-up/down, pitch and speed-lock can be checked
+ * without hardware.
  *
  * Build: g++ -std=c++11 -o sim_player sim_player.cpp && ./sim_player */
 
 #include <cstdio>
 #include <cmath>
 #include "../playspeed.h"
+
+#define RPM_BAND 0.3f
 
 /* Mirrors config.h SLEW_SPS_PER_MS. */
 static const float SLEW_SPS_PER_MS = 6.0f;
@@ -60,6 +64,33 @@ int main() {
   run("spindown 300ms", running ? krrl_rpm_to_sps(krrl_pitched_rpm(base, pitch)) : 0, 300);
   run("spindown settle", 0, 600);
   if (rate != 0) { printf("FAIL not stopped\n"); fails++; }
+
+  /* Closed-loop tach: model a belt that slips ~1%, so the platter runs slow
+   * unless the loop trims it up. Feed the measured speed back through the same
+   * period->rpm and proportional-trim helpers the firmware uses. */
+  printf("\nCLOSED-LOOP TACH @ 45 (belt slip 1%%)\n");
+  const float slip = 0.01f;
+  float ff = KRRL_RPM_45;
+  int32_t ff_sps = krrl_rpm_to_sps(ff);
+  int32_t cmd = ff_sps;
+  int32_t lim = ff_sps / 8;
+  float measured = 0.0f;
+  bool locked = false;
+  for (int rev = 1; rev <= 8; rev++) {
+    /* Actual platter speed for this commanded rate, reduced by slip. */
+    float actual_rpm = (float)cmd * 60.0f / KRRL_PLATTER_STEPS_PER_REV * (1.0f - slip);
+    /* One index mark per rev: period the sensor would report, then back out. */
+    uint32_t period_us = (uint32_t)(60000000.0f / actual_rpm + 0.5f);
+    measured = krrl_tach_rpm(period_us, KRRL_TACH_PPR);
+    int32_t trim = krrl_tach_trim_sps(ff, measured, KRRL_TACH_KP_SPS_PER_RPM);
+    if (trim > lim) trim = lim;
+    if (trim < -lim) trim = -lim;
+    cmd = ff_sps + trim;
+    locked = fabsf(measured - ff) <= RPM_BAND;
+    printf("rev %d  cmd=%4ld sps  measured=%.3f rpm  err=%+.3f  %s\n",
+           rev, (long)cmd, measured, measured - ff, locked ? "LOCKED" : "seek");
+  }
+  if (!locked) { printf("FAIL tach did not lock\n"); fails++; }
 
   if (fails) { printf("\n%d check(s) FAILED\n", fails); return 1; }
   printf("\nsim_player: ok\n");

@@ -24,8 +24,11 @@
 /* ---- Pitch fader (10k linear pot: ends to 5V/GND, wiper here) ---- */
 #define PIN_PITCH_POT    A0
 
+/* ---- Closed-loop optical tachometer (1 mark/rev, INT0) ---- */
+#define PIN_TACH         2   /* photo-interrupter / reflective sensor output */
+
 /* ---- Status LED (onboard) ---- */
-#define PIN_LED_RUN      13  /* on = platter running, blink = pitch trimmed */
+#define PIN_LED_RUN      13  /* off = stopped, blink = seeking, solid = locked */
 
 /* ---- Step generation ---- */
 #define ISR_HZ 20000UL       /* Timer1 step tick, matches the lathe core */
@@ -39,6 +42,10 @@
 /* Platter acceleration as a step-rate slew, so the belt starts and changes
  * speed smoothly instead of stalling. sps added/removed per control poll. */
 #define SLEW_SPS_PER_MS  6.0f
+
+/* Closed-loop lock tolerance: |measured - target| within this is "at speed"
+ * (drives the LED). Matches the lathe RPM_BAND. */
+#define RPM_BAND         0.3f
 
 /* Default speed selected at power-on. */
 #define DEFAULT_RPM KRRL_RPM_33
