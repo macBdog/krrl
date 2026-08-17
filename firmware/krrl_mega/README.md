@@ -12,3 +12,10 @@ To configure TMC2209 current/microsteps over UART at boot:
 4. Set MS1/MS2 addresses: platter 00, X 01, Z 10
 
 Pins match `config.h` and the comments in `config/machine.yaml`.
+
+## Closed-loop platter speed
+
+The platter runs closed-loop on a 1-pulse-per-rev optical tachometer (`PIN_TACH`,
+pin 3). Feedforward step rate plus a proportional trim from the measured RPM; see
+[`docs/TACHOMETER.md`](../../docs/TACHOMETER.md) for how it works and how to mark
+and machine the platter (shared with the player variant).
