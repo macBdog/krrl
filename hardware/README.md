@@ -40,9 +40,9 @@ Design consequences that thread through the rest of these notes:
   isolation, not gearing.
 - **Speed is open-loop.** There is no runtime speed feedback; absolute accuracy
   comes from calibrating `steps_per_rev` (see
-  [`docs/CALIBRATION.md`](../docs/CALIBRATION.md)). The optional once-per-rev
-  optical index is only a passive at-speed monitor
-  ([`docs/TACHOMETER.md`](../docs/TACHOMETER.md)).
+  [`docs/CALIBRATION.md`](../docs/CALIBRATION.md)). The player has no speed
+  sensor; the lathe may optionally fit a once-per-rev optical index as a passive
+  at-speed monitor ([`docs/TACHOMETER.md`](../docs/TACHOMETER.md)).
 
 ## Contents
 

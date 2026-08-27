@@ -22,7 +22,6 @@ The default build is STEP/DIR only and needs no libraries.
 | START | D9 | momentary to GND |
 | STOP | D10 | momentary to GND |
 | Pitch fader | A0 | 10k linear pot wiper; ends to 5V and GND |
-| Optical index | D2 | optional 1 pulse/rev sensor (INT0); see docs/TACHOMETER.md |
 | Run LED | D13 | onboard; off = stopped, blink = spinning up, solid = at speed |
 
 Buttons are `INPUT_PULLUP`, wired button-to-ground. The pitch fader is a 10k
@@ -36,14 +35,12 @@ so the platter speed doesn't jitter.
 ## Speed: open-loop feedforward
 
 Platter speed is open-loop — the step rate sets the speed, with no runtime
-control loop. Set absolute speed by **calibration**
+control loop and no on-board speed sensor. Set absolute speed by **calibration**
 ([`docs/CALIBRATION.md`](../../docs/CALIBRATION.md)); the fine trim is
 `KRRL_SPEED_TRIM_PPM` in `playspeed.h` (or adjust `KRRL_PLATTER_STEPS_PER_REV`).
-
-An optional 1-pulse-per-rev optical index on `D2` is a **passive at-speed
-monitor** for the LED only — it does not steer the step rate, and the firmware
-runs fine without it. Sensor choice, marking and machining are in
-[`docs/TACHOMETER.md`](../../docs/TACHOMETER.md).
+Speed verification is done with external calibration equipment, not by the
+firmware. The `LED` at-speed indication reflects the feedforward ramp reaching
+the commanded rate.
 
 ## TMC2209 current / microsteps (optional)
 

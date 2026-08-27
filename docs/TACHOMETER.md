@@ -6,42 +6,36 @@ synchronous, so the commanded step rate *is* the speed; torque margin keeps it
 there. There is **no runtime speed control loop** — absolute accuracy comes from
 [calibration](CALIBRATION.md), not feedback.
 
-An optional **once-per-revolution optical index mark** is still useful as a
-**passive at-speed / lost-step monitor**: it reports the platter's actual speed
-for the LED and the lathe's `START` interlock, but it never steers the step
-rate. (A single mark per rev is far too slow to close a speed loop, and it can
-only see average speed, not wow/flutter — which is why the drive is open-loop.)
+On the **lathe**, an optional **once-per-revolution optical index mark** is still
+useful as a **passive at-speed / lost-step monitor**: it reports the platter's
+actual speed for telemetry and the `START` interlock, but it never steers the
+step rate. (A single mark per rev is far too slow to close a speed loop, and it
+only sees average speed, not wow/flutter — which is why the drive is open-loop.)
 
-This document applies to **both** builds. They share one platter, so they share
-one marking scheme. Fitting the sensor is optional; both firmwares run without
-it.
+The **player** carries **no speed sensor**: it is fully open-loop and its
+at-speed LED simply reflects the feedforward ramp reaching the commanded rate.
 
-## How it works
+The platter **marking and machining** below therefore apply to the lathe (or any
+build where you choose to fit the sensor); both firmwares run without it.
+
+## How it works (lathe)
 
 1. **One index mark per revolution** on the platter passes an optical sensor
    mounted on the chassis. The sensor outputs one clean pulse per rev.
-2. The pulse edge fires an interrupt (`platter_tach_isr` on the player,
-   `motion_tach_isr` on the lathe). The handler timestamps the edge with
-   `micros()` and records the **mark-to-mark period**. Edges closer than 2 ms
-   (noise) or slower than 2 s are rejected.
+2. The pulse edge fires the `motion_tach_isr` interrupt, which timestamps the
+   edge with `micros()` and records the **mark-to-mark period**. Edges closer
+   than 2 ms (noise) or slower than 2 s are rejected.
 3. Measured speed is `rpm = 60 000 000 / (period_us × marks_per_rev)`. With one
    mark per rev (`marks_per_rev = 1`) the period in microseconds is the whole
-   revolution. This is `krrl_tach_rpm()` in
-   [`firmware/krrl_player/playspeed.h`](../firmware/krrl_player/playspeed.h); the
-   lathe computes the same thing inline.
-4. The measured value drives **indication only**:
-   - Player: the onboard LED goes solid when `|measured − target| ≤ RPM_BAND`
-     (0.3 rpm), blinking while spinning up.
-   - Lathe: telemetry reports `rpm`, and the `START` interlock requires the
-     platter to be at speed before a cut.
-   The commanded step rate stays pure feedforward regardless.
+   revolution; `motion.cpp` computes this inline.
+4. The measured value drives **indication only**: telemetry reports `rpm`, and
+   the `START` interlock requires the platter to be at speed before a cut. The
+   commanded step rate stays pure feedforward regardless.
 
-**No sensor fitted:** no pulse ever arrives, so the firmware falls back to the
-open-loop speed estimate (the player still shows "at speed" once spun up; the
-lathe treats feedforward speed as at-speed). Fitting the sensor later needs no
-firmware change.
+**No sensor fitted:** no pulse ever arrives, so the lathe treats the feedforward
+speed as at-speed. Fitting the sensor later needs no firmware change.
 
-Marks per rev is fixed at **1** in firmware (`KRRL_TACH_PPR`, and `tach_ppr` in
+Marks per rev is fixed at **1** (`tach_ppr` in
 [`config/machine.yaml`](../config/machine.yaml)). Use exactly one index feature.
 
 For **absolute speed accuracy**, do not rely on this once-per-rev signal — see
@@ -58,10 +52,12 @@ Use a 5 V digital optical sensor with a clean (ideally Schmitt-triggered) output
   high/low-contrast mark on a platter face. Simpler to mount; needs a good
   contrast mark and a fixed standoff.
 
-| Signal | Lathe (Mega) | Player (Nano) |
-|--------|--------------|---------------|
-| Tach input | pin `3` (`PIN_TACH`) | pin `2` (`PIN_TACH`, INT0) |
-| Sensor Vcc / GND | 5 V / GND | 5 V / GND |
+| Signal | Lathe (Mega) |
+|--------|--------------|
+| Tach input | pin `3` (`PIN_TACH`) |
+| Sensor Vcc / GND | 5 V / GND |
+
+(The player has no tach input; it does not read a speed sensor.)
 
 The input uses `INPUT_PULLUP` and triggers on the **rising** edge. Keep the lead
 short or shielded; add a 100 nF cap at the sensor if the output is noisy. Aim
@@ -142,18 +138,8 @@ is concentric with the spindle. Below assumes an aluminium platter.
 6. **Apply the contrast mark (Option B only).** After final finishing, add
    exactly **one** matte-black mark (or one reflective foil mark on a dark track)
    ~6–8 mm long at the sensor radius. Keep the rest of the track uniform.
-7. **Fit and verify.** Mount the sensor at the recorded radius and standoff.
-   Spin the platter by hand and confirm the sensor toggles **once per
-   revolution** with clean high/low levels. Then power up: the player LED should
-   go solid (at speed) after spin-up, and the lathe should report `rpm` and reach
-   `READY`/at-speed. Remember this only confirms the monitor works — set true
-   speed via [calibration](CALIBRATION.md).
-
-## Verifying without hardware
-
-The passive tach math is covered by the shared, host-buildable test:
-
-```
-cd firmware/krrl_player/test
-g++ -std=c++11 -o test_playspeed test_playspeed.cpp && ./test_playspeed  # period->rpm + speed math
-```
+7. **Fit and verify (lathe).** Mount the sensor at the recorded radius and
+   standoff. Spin the platter by hand and confirm the sensor toggles **once per
+   revolution** with clean high/low levels. Then power up and confirm the lathe
+   reports `rpm` and reaches `READY`/at-speed. Remember this only confirms the
+   monitor works — set true speed via [calibration](CALIBRATION.md).

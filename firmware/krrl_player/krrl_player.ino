@@ -10,8 +10,7 @@
  *  - 33/45/78 select the nominal speed (persists across start/stop).
  *  - START/STOP spin the platter up/down (rate-slewed for the belt).
  *  - PITCH is a continuous fader: centre detent = 0%, ends = +/-8%.
- *  - Speed is open-loop feedforward; calibrate per docs/CALIBRATION.md. An
- *    optional optical index mark drives the at-speed LED (docs/TACHOMETER.md).
+ *  - Speed is open-loop feedforward; calibrate per docs/CALIBRATION.md.
  *  - Onboard LED: off = stopped, blinking = spinning up, solid = at speed. */
 
 static float base_rpm = DEFAULT_RPM;
@@ -26,7 +25,7 @@ static void apply_speed() {
 static void update_led() {
   if (!running) {
     digitalWrite(PIN_LED_RUN, LOW);
-  } else if (platter_locked()) {
+  } else if (platter_at_speed()) {
     digitalWrite(PIN_LED_RUN, HIGH);
   } else {
     digitalWrite(PIN_LED_RUN, (millis() / 250) & 1 ? HIGH : LOW);

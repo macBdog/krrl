@@ -94,6 +94,8 @@ and makes flutter visible as edge "shimmer". Cheap sanity check.
 | Lathe (Mega) | `PLATTER_STEPS_PER_REV` in `firmware/krrl_mega/config.h` (and `platter.steps_per_rev` in `config/machine.yaml`) | `PLATTER_CAL_PPM` |
 | Player (Nano) | `KRRL_PLATTER_STEPS_PER_REV` in `firmware/krrl_player/playspeed.h` | `KRRL_SPEED_TRIM_PPM` |
 
-The optional once-per-rev optical index (see [TACHOMETER.md](TACHOMETER.md)) is a
-passive at-speed monitor; because it samples only once per revolution it is not a
-calibration reference. Use the independent, high-resolution setups above.
+The lathe's optional once-per-rev optical index (see
+[TACHOMETER.md](TACHOMETER.md)) is a passive at-speed monitor; because it samples
+only once per revolution it is not a calibration reference. The player has no
+speed sensor at all. Either way, calibrate with the independent, high-resolution
+setups above.

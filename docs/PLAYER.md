@@ -9,9 +9,9 @@ hardware, no host, no UI, no serial protocol.
 - Playback at **33⅓ / 45 / 78** rpm.
 - Continuous **pitch fader** of **±8%** (centre detent = 0%).
 - **Start / Stop** with a smooth rate-slewed belt spin-up.
-- **Open-loop feedforward speed** (no runtime control loop); set absolute speed
-  via [docs/CALIBRATION.md](CALIBRATION.md). An optional once-per-rev optical
-  index drives the at-speed LED ([docs/TACHOMETER.md](TACHOMETER.md)).
+- **Open-loop feedforward speed** — no runtime control loop and **no speed
+  sensor**. Set absolute speed via [docs/CALIBRATION.md](CALIBRATION.md). The
+  at-speed LED reflects the feedforward ramp reaching the commanded rate.
 
 No cutter, heater, vacuum, camera, audio pipeline, homing or limits — none of the
 lathe's cut path is present.
@@ -24,9 +24,9 @@ lathe's cut path is present.
   same open-loop speed math (`sps = rpm / 60 * 3200`). The platter steps-per-rev
   matches the lathe (`firmware/krrl_mega/config.h`, `config/machine.yaml`) and
   the shared math lives in `firmware/krrl_player/playspeed.h`.
-- The **open-loop platter drive** and the optional single-index optical monitor
-  and its marking scheme. See [docs/TACHOMETER.md](TACHOMETER.md) and
-  [docs/CALIBRATION.md](CALIBRATION.md).
+- The **open-loop platter drive** and the calibration approach. See
+  [docs/CALIBRATION.md](CALIBRATION.md). (The optional optical index monitor is a
+  lathe-only feature — [docs/TACHOMETER.md](TACHOMETER.md).)
 
 ## Controls
 

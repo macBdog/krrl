@@ -15,7 +15,7 @@ Motor,Stepper driver,1,"TMC2209 STEP/DIR + UART, ~1.7 A RMS",TMC2209 module,play
 Motor,Stepper driver,3,"TMC2209 STEP/DIR + UART",TMC2209 module,lathe,Lathe = platter + X + Z
 Motor,Stepper driver (big-motor alt),1,"TMC5160 or DM542-class",TMC5160 / DM542,lathe,Only with NEMA 23 beyond TMC2209 current
 Motor,Motor supply,1,"24 V regulated",24 V PSU,both,Keep isolated from phono supply
-Sensor,Optical index sensor,1,"5 V digital, slotted or reflective, 1 pulse/rev",slot opto / TCRT5000,both,OPTIONAL passive at-speed monitor only (docs/TACHOMETER.md)
+Sensor,Optical index sensor,1,"5 V digital, slotted or reflective, 1 pulse/rev",slot opto / TCRT5000,lathe,OPTIONAL lathe-only passive at-speed monitor (docs/TACHOMETER.md); player has no sensor
 Control,Microcontroller,1,"Arduino Nano (ATmega328P), crystal-clocked",Nano,player,Crystal (not resonator) for open-loop speed stability
 Control,Microcontroller,1,"Arduino Mega 2560",Mega 2560,lathe,
 Control,Speed/transport buttons,5,"Momentary, NO, to GND",tact/panel switch,player,33 / 45 / 78 / START / STOP

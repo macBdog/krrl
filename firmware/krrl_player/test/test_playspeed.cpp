@@ -58,14 +58,6 @@ int main() {
   eq_f("pot ~3/4 up", krrl_pot_to_pitch_pct(767, 1023, 10), 3.9203f);
   eq_f("pot clamp over-range", krrl_pot_to_pitch_pct(2000, 1023, 10), 8.0f);
 
-  /* Passive optical tach: mark-to-mark period -> rpm (one mark/rev). Readout
-   * only; it does not steer the step rate. */
-  eq_f("tach 45rpm 1ppr", krrl_tach_rpm(1333333, 1), 45.0f);
-  eq_f("tach 78rpm 1ppr", krrl_tach_rpm(769231, 1), 78.0f);
-  eq_f("tach 45rpm 2ppr", krrl_tach_rpm(666666, 2), 45.0f);
-  eq_f("tach bad period", krrl_tach_rpm(0, 1), 0.0f);
-  eq_f("tach bad ppr", krrl_tach_rpm(1000, 0), 0.0f);
-
   if (fails) { printf("\n%d check(s) FAILED\n", fails); return 1; }
   printf("\nplayspeed: ok\n");
   return 0;
