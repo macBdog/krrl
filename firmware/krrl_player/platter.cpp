@@ -121,8 +121,8 @@ void platter_poll() {
   int32_t max_step = (int32_t)(SLEW_SPS_PER_MS * (float)dt);
   base_sps = krrl_slew_toward(base_sps, ff_sps, max_step);
 
-  int32_t cmd = base_sps;
-
+  /* Passive tach readout for the at-speed indicator: report the measured speed
+   * (or an open-loop estimate with no sensor). It never steers the rate. */
   if (target_rpm > 0.01f) {
     if (tach_fresh) {
       noInterrupts();
@@ -131,26 +131,15 @@ void platter_poll() {
       interrupts();
       measured_rpm = krrl_tach_rpm(p, KRRL_TACH_PPR);
     } else if (!tach_seen) {
-      /* No optical sensor fitted (or not spinning yet): open-loop estimate. */
       measured_rpm = sps_to_rpm(base_sps);
     }
-    /* Close the loop only when the tach is actually reporting, and keep the
-     * trim a fine correction so it never overpowers the spin-up slew. */
-    if (tach_seen) {
-      int32_t trim = krrl_tach_trim_sps(target_rpm, measured_rpm,
-                                        KRRL_TACH_KP_SPS_PER_RPM);
-      int32_t lim = ff_sps / 8;
-      if (lim < 1) lim = 1;
-      if (trim > lim) trim = lim;
-      if (trim < -lim) trim = -lim;
-      cmd = base_sps + trim;
-    }
-    if (cmd < 0) cmd = 0;
   } else {
     measured_rpm = 0;
   }
 
+  /* Open-loop feedforward: the commanded step rate is the slewed feedforward
+   * only. Absolute speed is set by calibration (see docs/CALIBRATION.md). */
   noInterrupts();
-  rate_sps = cmd;
+  rate_sps = base_sps;
   interrupts();
 }

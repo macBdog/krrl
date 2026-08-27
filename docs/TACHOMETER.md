@@ -1,14 +1,20 @@
-# Closed-loop optical tachometer
+# Optical index mark (passive at-speed monitor)
 
 Both KRRL-01 machines — the lathe (Mega) and the player (Nano) — drive the same
-belt-driven platter with a stepper. A stepper is nearly synchronous, so the
-commanded step rate is an accurate **feedforward** speed. The optical tachometer
-closes the loop on top of that: it measures the platter's *actual* revolutions
-and trims the step rate to cancel belt stretch, slip and load, so 33⅓/45/78 stay
-locked.
+belt-driven platter with a stepper, **open-loop**. A stepper is nearly
+synchronous, so the commanded step rate *is* the speed; torque margin keeps it
+there. There is **no runtime speed control loop** — absolute accuracy comes from
+[calibration](CALIBRATION.md), not feedback.
+
+An optional **once-per-revolution optical index mark** is still useful as a
+**passive at-speed / lost-step monitor**: it reports the platter's actual speed
+for the LED and the lathe's `START` interlock, but it never steers the step
+rate. (A single mark per rev is far too slow to close a speed loop, and it can
+only see average speed, not wow/flutter — which is why the drive is open-loop.)
 
 This document applies to **both** builds. They share one platter, so they share
-one marking scheme.
+one marking scheme. Fitting the sensor is optional; both firmwares run without
+it.
 
 ## How it works
 
@@ -23,23 +29,23 @@ one marking scheme.
    revolution. This is `krrl_tach_rpm()` in
    [`firmware/krrl_player/playspeed.h`](../firmware/krrl_player/playspeed.h); the
    lathe computes the same thing inline.
-4. Each poll the firmware sets the platter rate to
-   `feedforward + Kp × (target_rpm − measured_rpm)`, where
-   `feedforward = target_rpm / 60 × steps_per_rev` and `Kp = 40` steps/s per rpm
-   of error (`krrl_tach_trim_sps()`). The trim is clamped so it fine-tunes speed
-   without overpowering the spin-up ramp.
-5. When `|measured − target| ≤ RPM_BAND` (0.3 rpm) the platter is **locked**.
-   On the player the onboard LED goes solid at lock (blinking while seeking); on
-   the lathe the interlock/telemetry (`state`, `rpm`) reports it and `START`
-   requires the platter to be at speed.
+4. The measured value drives **indication only**:
+   - Player: the onboard LED goes solid when `|measured − target| ≤ RPM_BAND`
+     (0.3 rpm), blinking while spinning up.
+   - Lathe: telemetry reports `rpm`, and the `START` interlock requires the
+     platter to be at speed before a cut.
+   The commanded step rate stays pure feedforward regardless.
 
-**Open-loop fallback:** if no sensor is fitted, no pulse ever arrives and the
-firmware runs purely on feedforward (the player reports the open-loop estimate
-and still locks once spun up). Fitting the sensor later needs no firmware
-change.
+**No sensor fitted:** no pulse ever arrives, so the firmware falls back to the
+open-loop speed estimate (the player still shows "at speed" once spun up; the
+lathe treats feedforward speed as at-speed). Fitting the sensor later needs no
+firmware change.
 
 Marks per rev is fixed at **1** in firmware (`KRRL_TACH_PPR`, and `tach_ppr` in
 [`config/machine.yaml`](../config/machine.yaml)). Use exactly one index feature.
+
+For **absolute speed accuracy**, do not rely on this once-per-rev signal — see
+[docs/CALIBRATION.md](CALIBRATION.md) for the sensor rigs and procedure.
 
 ## Sensor and wiring
 
@@ -139,16 +145,15 @@ is concentric with the spindle. Below assumes an aluminium platter.
 7. **Fit and verify.** Mount the sensor at the recorded radius and standoff.
    Spin the platter by hand and confirm the sensor toggles **once per
    revolution** with clean high/low levels. Then power up: the player LED should
-   go solid (locked) after spin-up, and the lathe should report `rpm` matching
-   the selected speed and reach `READY`/at-speed.
+   go solid (at speed) after spin-up, and the lathe should report `rpm` and reach
+   `READY`/at-speed. Remember this only confirms the monitor works — set true
+   speed via [calibration](CALIBRATION.md).
 
 ## Verifying without hardware
 
-The tach math and the correction loop are covered by the shared, host-buildable
-tests:
+The passive tach math is covered by the shared, host-buildable test:
 
 ```
 cd firmware/krrl_player/test
-g++ -std=c++11 -o test_playspeed test_playspeed.cpp && ./test_playspeed  # rpm/trim math
-g++ -std=c++11 -o sim_player sim_player.cpp && ./sim_player               # loop locks a slipping belt
+g++ -std=c++11 -o test_playspeed test_playspeed.cpp && ./test_playspeed  # period->rpm + speed math
 ```

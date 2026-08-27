@@ -36,10 +36,16 @@ static inline float krrl_pitched_rpm(float base_rpm, float pitch_pct) {
   return base_rpm * (1.0f + krrl_clamp_pitch_pct(pitch_pct) / 100.0f);
 }
 
-/* Platter step rate (steps/s) for a platter RPM. Matches the lathe's
- * open-loop rate: sps = rpm / 60 * steps_per_rev. */
+/* Fine open-loop speed calibration, parts-per-million. Set after measuring the
+ * true platter speed against a calibrated reference (see docs/CALIBRATION.md).
+ * 0 = use steps_per_rev as-is. */
+#define KRRL_SPEED_TRIM_PPM 0
+
+/* Platter step rate (steps/s) for a platter RPM. Open-loop feedforward:
+ * sps = rpm / 60 * steps_per_rev, with the ppm calibration trim applied. */
 static inline int32_t krrl_rpm_to_sps(float rpm) {
   if (rpm < 0.0f) rpm = 0.0f;
+  rpm *= (1.0f + (float)KRRL_SPEED_TRIM_PPM / 1000000.0f);
   return (int32_t)(rpm / 60.0f * KRRL_PLATTER_STEPS_PER_REV + 0.5f);
 }
 
@@ -67,28 +73,4 @@ static inline int32_t krrl_slew_toward(int32_t cur, int32_t target, int32_t max_
   if (err > max_step) err = max_step;
   if (err < -max_step) err = -max_step;
   return cur + err;
-}
-
-/* ---- Closed-loop optical tachometer ---- */
-
-/* Marks (pulses) per revolution the platter carries. The KRRL platters use a
- * single index mark, matching the lathe firmware and config/machine.yaml. */
-#define KRRL_TACH_PPR 1
-
-/* Proportional correction gain, in platter steps/s per rpm of error. Matches
- * the lathe's platter trim (firmware/krrl_mega/motion.cpp). */
-#define KRRL_TACH_KP_SPS_PER_RPM 40.0f
-
-/* Measured platter RPM from the period between optical-tach pulses.
- * rpm = 60e6 us/min / (period_us * marks_per_rev). Returns 0 on a bad period. */
-static inline float krrl_tach_rpm(uint32_t period_us, int ppr) {
-  if (period_us == 0 || ppr < 1) return 0.0f;
-  return 60000000.0f / ((float)period_us * (float)ppr);
-}
-
-/* Proportional speed trim (steps/s) from the RPM error, same form the lathe
- * adds on top of the open-loop feedforward rate. */
-static inline int32_t krrl_tach_trim_sps(float target_rpm, float measured_rpm,
-                                         float kp_sps_per_rpm) {
-  return (int32_t)((target_rpm - measured_rpm) * kp_sps_per_rpm);
 }

@@ -10,8 +10,9 @@
  *  - 33/45/78 select the nominal speed (persists across start/stop).
  *  - START/STOP spin the platter up/down (rate-slewed for the belt).
  *  - PITCH is a continuous fader: centre detent = 0%, ends = +/-8%.
- *  - Speed is held by the optical tachometer (see docs/TACHOMETER.md).
- *  - Onboard LED: off = stopped, blinking = seeking, solid = speed-locked. */
+ *  - Speed is open-loop feedforward; calibrate per docs/CALIBRATION.md. An
+ *    optional optical index mark drives the at-speed LED (docs/TACHOMETER.md).
+ *  - Onboard LED: off = stopped, blinking = spinning up, solid = at speed. */
 
 static float base_rpm = DEFAULT_RPM;
 static float pitch_pct = 0.0f;

@@ -22,8 +22,8 @@ The default build is STEP/DIR only and needs no libraries.
 | START | D9 | momentary to GND |
 | STOP | D10 | momentary to GND |
 | Pitch fader | A0 | 10k linear pot wiper; ends to 5V and GND |
-| Optical tach | D2 | 1 pulse/rev sensor output (INT0); see docs/TACHOMETER.md |
-| Run LED | D13 | onboard; off = stopped, blink = seeking, solid = speed-locked |
+| Optical index | D2 | optional 1 pulse/rev sensor (INT0); see docs/TACHOMETER.md |
+| Run LED | D13 | onboard; off = stopped, blink = spinning up, solid = at speed |
 
 Buttons are `INPUT_PULLUP`, wired button-to-ground. The pitch fader is a 10k
 linear potentiometer: outer legs to 5V and GND, wiper to A0. Pins are in
@@ -33,12 +33,16 @@ Pitch is continuous: the fader **centre detent reads 0%** (a small deadband
 holds nominal speed), and each end reaches **±8%**. Firmware smooths the reading
 so the platter speed doesn't jitter.
 
-## Closed-loop speed (optical tach)
+## Speed: open-loop feedforward
 
-The platter speed is held by a 1-pulse-per-rev optical tachometer on `D2`
-(feedforward step rate plus the lathe's proportional trim). If no sensor is
-fitted the firmware runs open-loop and still reaches speed. How it works, sensor
-choice, and how to mark and machine the platter are in
+Platter speed is open-loop — the step rate sets the speed, with no runtime
+control loop. Set absolute speed by **calibration**
+([`docs/CALIBRATION.md`](../../docs/CALIBRATION.md)); the fine trim is
+`KRRL_SPEED_TRIM_PPM` in `playspeed.h` (or adjust `KRRL_PLATTER_STEPS_PER_REV`).
+
+An optional 1-pulse-per-rev optical index on `D2` is a **passive at-speed
+monitor** for the LED only — it does not steer the step rate, and the firmware
+runs fine without it. Sensor choice, marking and machining are in
 [`docs/TACHOMETER.md`](../../docs/TACHOMETER.md).
 
 ## TMC2209 current / microsteps (optional)

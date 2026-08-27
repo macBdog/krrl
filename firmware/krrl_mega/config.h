@@ -47,6 +47,10 @@
 #define RPM_BAND 0.3f
 #define HEAT_BAND_C 5.0f
 
+/* Fine open-loop speed calibration (ppm). Set after measuring the true platter
+ * speed against a calibrated reference; see docs/CALIBRATION.md. 0 = none. */
+#define PLATTER_CAL_PPM 0
+
 enum State : uint8_t {
   ST_IDLE = 0,
   ST_HOMING,
