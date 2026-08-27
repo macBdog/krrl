@@ -1,0 +1,32 @@
+Subsystem,Item,Qty,Spec,Example part,Applies to,Notes
+Drive,Platter spindle bearing,2,"Angular-contact ball, bore 25-30 mm, P5/ABEC-5",7206-P5 (pair),both,Back-to-back (DB/O); light-medium preload for rim/moment stiffness
+Drive,Platter spindle bearing (alt),1,"Crossed-roller / four-point thin-section, bore to boss",THK RA / IKO CRB,both,Alternative: highest tilt stiffness per height; needs flat housing
+Drive,Platter spindle,1,"Ground hardened steel, Ø25-30 mm, seats h6",custom,both,Housing bores H7; runout target <5 um TIR
+Drive,Sub-platter / drive pulley,1,"Aluminium, crowned belt surface, on spindle",custom,both,Driven pulley; sized for ~1:1 ratio
+Drive,Platter,1,"Aluminium, 356 mm (14 in) OD, ribbed/balanced",custom,both,Stiff and balanced; optional index track (see docs/TACHOMETER.md)
+Drive,Motor pulley,1,"Aluminium, crowned, dia for ~1:1 (<=2:1) ratio",custom,both,Ratio limited by 20 kHz step ISR (keep <8 kHz steps/s)
+Drive,Drive belt,1,"Flat 6 mm x 0.5-0.65 mm PU/neoprene, endless (or round O3-4 mm)",Gates/Habasit flat,both,Isolation belt; GT2/6 mm timing belt only if positive drive needed
+Drive,Idler pulley (tensioner),1,"Ball-bearing, crowned",bearing idler,both,Low drag; crown self-tracks the belt
+Drive,Tensioner arm,1,"Anodised/polished aluminium pivot arm",custom,both,Increases wrap to >=180 deg; aesthetic
+Drive,Tensioner preload,1,"Concealed extension spring or neodymium magnet pair",spring/N42 magnets,both,Constant-tension; set belt tension 2-5 N
+Motor,Stepper motor,1,"NEMA 17 high-torque, >=0.5 N.m, ~1.5 A/ph, 1.8 deg",17HS19-2004S1,both,Shared baseline; rate-slewed; open-loop torque margin
+Motor,Stepper motor (heavy-cut alt),1,"NEMA 23, 1.2-1.9 N.m",57-frame,lathe,Use if cutting loads high; needs bigger driver
+Motor,Stepper driver,1,"TMC2209 STEP/DIR + UART, ~1.7 A RMS",TMC2209 module,player,Player = 1 (platter). stealthChop for quiet
+Motor,Stepper driver,3,"TMC2209 STEP/DIR + UART",TMC2209 module,lathe,Lathe = platter + X + Z
+Motor,Stepper driver (big-motor alt),1,"TMC5160 or DM542-class",TMC5160 / DM542,lathe,Only with NEMA 23 beyond TMC2209 current
+Motor,Motor supply,1,"24 V regulated",24 V PSU,both,Keep isolated from phono supply
+Sensor,Optical index sensor,1,"5 V digital, slotted or reflective, 1 pulse/rev",slot opto / TCRT5000,both,OPTIONAL passive at-speed monitor only (docs/TACHOMETER.md)
+Control,Microcontroller,1,"Arduino Nano (ATmega328P), crystal-clocked",Nano,player,Crystal (not resonator) for open-loop speed stability
+Control,Microcontroller,1,"Arduino Mega 2560",Mega 2560,lathe,
+Control,Speed/transport buttons,5,"Momentary, NO, to GND",tact/panel switch,player,33 / 45 / 78 / START / STOP
+Control,Pitch fader,1,"10 k linear potentiometer",10k lin pot,player,"Centre detent = 0%, ends = +/-8%"
+Control,Status LED,1,"onboard / panel",-,player,off=stopped / blink=spinning up / solid=at speed
+Phono,Dual op-amp,1,"Low-noise, unity-gain stable",NE5532 / OPA2134 / LM4562,player,One package = stereo; active-feedback RIAA
+Phono,Cartridge load resistor,2,"47 kohm 1% metal film",-,player,At preamp input
+Phono,Cartridge load cap,2,"~100 pF (total incl. cable 150-300 pF)",C0G/NP0,player,Match cartridge spec
+Phono,RIAA feedback resistors,4,"~100 kohm and ~7.5 kohm, 1% metal film",-,player,R_A/R_B per channel; verify with RIAA calculator
+Phono,RIAA feedback caps,4,"~33 nF and ~10 nF, film 1-2.5%",polypropylene/polystyrene,player,C_A/C_B per channel; C_B*R_B = 75 us
+Phono,Gain/DC-block parts,per ch,"Rg ~1 kohm; Cg ~100 uF; Cin ~1-3.3 uF; Rout ~100 ohm; Cout ~2.2-10 uF",-,player,Sets midband gain ~40 dB and AC coupling
+Phono,Phono supply,1,"Linear regulated +/-12..15 V (or 24 V + virtual ground)",linear reg,player,SEPARATE from motor 24 V rail
+Phono,Shielded enclosure,1,"Steel / mu-metal box",-,player,Critical: 5 mV signal near stepper
+Phono,Line output,1,"RCA / 3.5 mm, AC-coupled ~100 ohm out",-,player,~0.3-1 V RMS to a line input

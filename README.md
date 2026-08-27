@@ -41,6 +41,7 @@ PYTHONPATH=host python3 -m krrl.check
 | `docs/PLAYER.md` | Player turntable variant |
 | `docs/TACHOMETER.md` | Optional optical index monitor + marking/machining |
 | `docs/CALIBRATION.md` | Open-loop platter speed calibration |
+| `hardware/` | Drive/bearing/belt/stepper/phono notes + BOM |
 | `deploy/` | systemd, PipeWire, OS tune |
 
 ## Player variant
