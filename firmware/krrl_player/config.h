@@ -14,18 +14,15 @@
 #define PIN_PLATTER_DIR  4
 #define PIN_PLATTER_EN   5   /* active LOW enable */
 
-/* ---- Front-panel buttons (momentary to GND, INPUT_PULLUP) ---- */
-#define PIN_BTN_33       6
-#define PIN_BTN_45       7
-#define PIN_BTN_78       8
-#define PIN_BTN_START    9
-#define PIN_BTN_STOP     10
+/* ---- Front panel ---- */
+#define PIN_BTN_MODE     6   /* momentary to GND, INPUT_PULLUP; cycles STOP/33/45/78 */
+#define PIN_PITCH_POT    A0  /* speed pot wiper; ends to 5V/GND (pitch trim) */
 
-/* ---- Pitch fader (10k linear pot: ends to 5V/GND, wiper here) ---- */
-#define PIN_PITCH_POT    A0
-
-/* ---- Status LED (onboard) ---- */
-#define PIN_LED_RUN      13  /* off = stopped, blink = spinning up, solid = at speed */
+/* Multicolour mode LED (common-cathode RGB, each anode via a series R). */
+#define PIN_LED_R        9
+#define PIN_LED_G        10
+#define PIN_LED_B        11
+/* The power LED is hardwired to +5V on the board and is not driven here. */
 
 /* ---- Step generation ---- */
 #define ISR_HZ 20000UL       /* Timer1 step tick, matches the lathe core */
