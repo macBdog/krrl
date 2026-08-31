@@ -12,3 +12,15 @@ To configure TMC2209 current/microsteps over UART at boot:
 4. Set MS1/MS2 addresses: platter 00, X 01, Z 10
 
 Pins match `config.h` and the comments in `config/machine.yaml`.
+
+## Platter speed: open-loop feedforward
+
+The platter runs open-loop — the step rate sets the speed, with no runtime
+control loop. Set absolute speed by **calibration**
+([`docs/CALIBRATION.md`](../../docs/CALIBRATION.md)); the fine trim is
+`PLATTER_CAL_PPM` in `config.h` (or adjust `PLATTER_STEPS_PER_REV`).
+
+The 1-pulse-per-rev optical tach (`PIN_TACH`, pin 3) is a **passive monitor**:
+it feeds telemetry `rpm` and the `START` at-speed interlock but does not steer
+the step rate. See [`docs/TACHOMETER.md`](../../docs/TACHOMETER.md) for the
+sensor and the platter marking/machining (shared with the player variant).

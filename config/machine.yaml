@@ -11,6 +11,8 @@ camera:
   device: /dev/video0
   width: 1280
   height: 720
+# platter runs open-loop; calibrate steps_per_rev per docs/CALIBRATION.md.
+# tach_ppr/rpm_band drive the passive optical at-speed monitor only.
 platter:
   steps_per_rev: 3200
   tach_ppr: 1

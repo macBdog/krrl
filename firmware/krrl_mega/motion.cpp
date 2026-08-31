@@ -220,17 +220,19 @@ void motion_poll() {
   servo_to_target(AXIS_Z, (int32_t)(4.0f * Z_STEPS_PER_MM));
 
   if (target_rpm > 0.01f) {
-    int32_t open_sps = (int32_t)(target_rpm / 60.0f * PLATTER_STEPS_PER_REV);
+    /* Open-loop feedforward with an optional ppm calibration trim. The optical
+     * tach is a passive speed monitor (telemetry + at-speed interlock); it does
+     * not steer the step rate. See docs/CALIBRATION.md. */
+    float cal = 1.0f + (float)PLATTER_CAL_PPM / 1000000.0f;
+    int32_t open_sps = (int32_t)(target_rpm / 60.0f * PLATTER_STEPS_PER_REV * cal);
     if (tach_fresh) {
       noInterrupts();
       uint32_t dt = tach_us;
       tach_fresh = 0;
       interrupts();
       measured_rpm = 60000000.0f / (float)dt;
-      float err = target_rpm - measured_rpm;
-      open_sps += (int32_t)(err * 40.0f);
     } else {
-      measured_rpm = target_rpm; /* open loop until tach */
+      measured_rpm = target_rpm; /* no tach: assume feedforward speed */
     }
     if (open_sps < 0) open_sps = 0;
     set_rate(AXIS_P, open_sps);
