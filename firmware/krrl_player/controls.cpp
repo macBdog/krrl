@@ -1,55 +1,39 @@
 #include "controls.h"
 
-enum { B_33, B_45, B_78, B_START, B_STOP, N_BTN };
+/* Debounced mode button. */
+static uint8_t stable;       /* 1 = pressed (debounced) */
+static uint8_t raw_last;
+static uint32_t changed_ms;
+static uint8_t edge;         /* set on the press edge, cleared on read */
 
-static const uint8_t PIN[N_BTN] = {
-  PIN_BTN_33, PIN_BTN_45, PIN_BTN_78,
-  PIN_BTN_START, PIN_BTN_STOP,
-};
-
-static uint8_t stable[N_BTN];      /* 1 = pressed (debounced) */
-static uint8_t raw_last[N_BTN];
-static uint32_t changed_ms[N_BTN];
-static uint8_t edge[N_BTN];        /* set on falling edge, cleared on read */
-
-static float pot_ema;              /* smoothed fader ADC reading */
+static float pot_ema;        /* smoothed pot ADC reading */
 
 void controls_begin() {
-  for (uint8_t i = 0; i < N_BTN; i++) {
-    pinMode(PIN[i], INPUT_PULLUP);
-    stable[i] = 0;
-    raw_last[i] = 1;               /* pulled up = released */
-    changed_ms[i] = millis();
-    edge[i] = 0;
-  }
+  pinMode(PIN_BTN_MODE, INPUT_PULLUP);
+  stable = 0;
+  raw_last = 1;              /* pulled up = released */
+  changed_ms = millis();
+  edge = 0;
   pinMode(PIN_PITCH_POT, INPUT);
   pot_ema = (float)analogRead(PIN_PITCH_POT);
 }
 
 void controls_poll() {
   uint32_t now = millis();
-  for (uint8_t i = 0; i < N_BTN; i++) {
-    uint8_t raw = digitalRead(PIN[i]) == LOW ? 1 : 0;
-    if (raw != raw_last[i]) {
-      raw_last[i] = raw;
-      changed_ms[i] = now;
-    } else if (now - changed_ms[i] >= DEBOUNCE_MS && raw != stable[i]) {
-      stable[i] = raw;
-      if (raw) edge[i] = 1;        /* just became pressed */
-    }
+  uint8_t raw = digitalRead(PIN_BTN_MODE) == LOW ? 1 : 0;
+  if (raw != raw_last) {
+    raw_last = raw;
+    changed_ms = now;
+  } else if (now - changed_ms >= DEBOUNCE_MS && raw != stable) {
+    stable = raw;
+    if (raw) edge = 1;        /* just became pressed */
   }
 }
 
-static bool take_edge(uint8_t i) {
-  if (edge[i]) { edge[i] = 0; return true; }
+bool press_mode() {
+  if (edge) { edge = 0; return true; }
   return false;
 }
-
-bool press_33() { return take_edge(B_33); }
-bool press_45() { return take_edge(B_45); }
-bool press_78() { return take_edge(B_78); }
-bool press_start() { return take_edge(B_START); }
-bool press_stop() { return take_edge(B_STOP); }
 
 float controls_pitch_pct() {
   int raw = analogRead(PIN_PITCH_POT);

@@ -6,12 +6,13 @@ hardware, no host, no UI, no serial protocol.
 
 ## What it does
 
-- Playback at **33⅓ / 45 / 78** rpm.
-- Continuous **pitch fader** of **±8%** (centre detent = 0%).
-- **Start / Stop** with a smooth rate-slewed belt spin-up.
+- Playback at **33⅓ / 45 / 78** rpm, selected by a single **mode button**
+  (cycles STOP → 33 → 45 → 78) with a **multicolour LED** showing the mode.
+- Continuous **speed pot** (pitch trim) of **±8%** (centre detent = 0%).
+- Smooth rate-slewed belt spin-up/down.
 - **Open-loop feedforward speed** — no runtime control loop and **no speed
   sensor**. Set absolute speed via [docs/CALIBRATION.md](CALIBRATION.md). The
-  at-speed LED reflects the feedforward ramp reaching the commanded rate.
+  LED reflects the feedforward ramp reaching the commanded rate.
 
 No cutter, heater, vacuum, camera, audio pipeline, homing or limits — none of the
 lathe's cut path is present.
@@ -30,19 +31,26 @@ lathe's cut path is present.
 
 ## Controls
 
-Five momentary buttons, one pitch fader and the onboard LED. Wiring and pins are
-in [`firmware/krrl_player/README.md`](../firmware/krrl_player/README.md).
+A single momentary **mode button**, a **speed pot**, a **multicolour (RGB) mode
+LED** and a **power LED**. Wiring and pins are in
+[`firmware/krrl_player/README.md`](../firmware/krrl_player/README.md); the
+single-board design is in [`hardware/player_pcb/`](../hardware/player_pcb).
 
 | Control | Action |
 |---------|--------|
-| 33 / 45 / 78 | Select nominal speed (persists across start/stop) |
-| START / STOP | Spin platter up / down |
-| Pitch fader | Continuous ±8% trim of running speed; centre detent = 0% |
-
-LED: solid while running at nominal speed, blinking while a pitch trim is applied.
+| Mode button | Cycle STOP → 33 → 45 → 78 (STOP spins down) |
+| Speed pot | Continuous ±8% pitch trim of the running speed; centre = 0% |
+| RGB mode LED | off = stopped, green = 33, blue = 45, red = 78; blinks while spinning up |
+| Power LED | Hardwired to +5V; power present |
 
 ## Firmware
 
 `firmware/krrl_player/` — build for **Arduino Nano** (ATmega328P). Default build
 is STEP/DIR only and needs no libraries. See the firmware README for the TMC2209
 UART option and the host-side test of the speed math.
+
+## Board
+
+A single fabricable KiCad PCB (Nano + TMC2209 + RIAA phono + I/O) is in
+[`hardware/player_pcb/`](../hardware/player_pcb), which also specifies the
+required external power supply.

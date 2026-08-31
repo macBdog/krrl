@@ -1,10 +1,14 @@
 # Nano player firmware
 
-Minimal belt-drive **playback** turntable: 33/45/78 with a ±8% pitch trim,
-start/stop, and nothing else. No host, no serial protocol, no cutter, heater or
-vacuum. It reuses the KRRL-01 belt drive motor, TMC2209 driver and the lathe's
-open-loop step-rate motion core (`playspeed.h`, `platter.cpp` derived from
-`firmware/krrl_mega/motion.cpp`).
+Minimal belt-drive **playback** turntable: 33/45/78 with a ±8% pitch trim and a
+single mode button, and nothing else. No host, no serial protocol, no cutter,
+heater or vacuum. It reuses the KRRL-01 belt drive motor, TMC2209 driver and the
+lathe's open-loop step-rate motion core (`playspeed.h`, `platter.cpp` derived
+from `firmware/krrl_mega/motion.cpp`).
+
+The front panel is a single **momentary mode button**, a **speed pot**, a
+**multicolour (RGB) mode LED** and a **power LED** — matching the single-board
+design in [`hardware/player_pcb/`](../../hardware/player_pcb).
 
 Open `krrl_player.ino` in Arduino IDE (board: **Arduino Nano**, ATmega328P).
 The default build is STEP/DIR only and needs no libraries.
@@ -16,21 +20,22 @@ The default build is STEP/DIR only and needs no libraries.
 | Platter STEP | D3 | to TMC2209 STEP |
 | Platter DIR | D4 | to TMC2209 DIR |
 | Platter EN | D5 | active LOW |
-| 33 select | D6 | momentary to GND |
-| 45 select | D7 | momentary to GND |
-| 78 select | D8 | momentary to GND |
-| START | D9 | momentary to GND |
-| STOP | D10 | momentary to GND |
-| Pitch fader | A0 | 10k linear pot wiper; ends to 5V and GND |
-| Run LED | D13 | onboard; off = stopped, blink = spinning up, solid = at speed |
+| MODE button | D6 | momentary to GND; cycles STOP → 33 → 45 → 78 |
+| Mode LED R / G / B | D9 / D10 / D11 | common-cathode RGB, each anode via a series R |
+| Speed pot | A0 | 10k linear pot wiper; ends to 5V and GND |
+| TMC UART | D0/D1 | optional, `-DTMC_UART` (RX/TX to PDN_UART via 1k) |
 
-Buttons are `INPUT_PULLUP`, wired button-to-ground. The pitch fader is a 10k
-linear potentiometer: outer legs to 5V and GND, wiper to A0. Pins are in
-`config.h`.
+The mode button is `INPUT_PULLUP`, wired button-to-ground. The speed pot is a
+10k linear potentiometer: outer legs to 5V and GND, wiper to A0. Pins are in
+`config.h`. The **power LED is hardwired to +5V** on the board (not a Nano pin).
 
-Pitch is continuous: the fader **centre detent reads 0%** (a small deadband
-holds nominal speed), and each end reaches **±8%**. Firmware smooths the reading
-so the platter speed doesn't jitter.
+**Mode button** cycles `STOP → 33 → 45 → 78 → STOP`; STOP spins the platter
+down. The **RGB LED** shows the mode — off = stopped, green = 33, blue = 45,
+red = 78 — blinking while spinning up and solid once at speed.
+
+The **speed pot** is a continuous pitch trim: **centre detent reads 0%** (a small
+deadband holds nominal speed), each end reaches **±8%**, smoothed so the platter
+speed doesn't jitter.
 
 ## Speed: open-loop feedforward
 
