@@ -51,6 +51,7 @@ Design consequences that thread through the rest of these notes:
 | [`drive.md`](drive.md) | Platter bearings, belt spec, stepper + driver, belt tensioner |
 | [`phono.md`](phono.md) | Minimal-component phono amplification + RIAA EQ (player) |
 | [`BOM.csv`](BOM.csv) | Consolidated bill of materials (lathe / player / both) |
+| [`player_pcb/`](player_pcb) | Player single-board KiCad design (Nano + TMC2209 + RIAA + I/O), fab outputs |
 
 ## Related
 
